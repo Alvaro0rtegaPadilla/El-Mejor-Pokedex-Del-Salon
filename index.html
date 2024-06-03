@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PONYTA</title>
+    <style>
+        body {
+            background-image: linear-gradient(to right, rgb(224, 64, 0), rgb(255, 229, 163));
+            background-size: cover;
+            background-repeat: no-repeat;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .pokeimg1 {
+            width: 250px;
+            height: 100px;
+            position: absolute;
+            color: white;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            text-shadow: 1px 1px 1px black;
+        }
+        button {
+            width: 55px;
+            height: 55px;
+            background-color: #c76700;
+            margin: 5px;
+            padding: 10px;
+            border-radius: 100px;
+            border-color: rgb(255, 190, 68);
+            font-size: 10px;
+            line-height: 32px;
+            text-transform: uppercase;
+            position: absolute;
+            left: 70px;
+            top: 495px;
+            
+        }
+        .placeholder {
+            position: absolute;
+            top: 525px;
+            left: 150px;
+            width: 120px;
+            height: 63px;
+            font-size: 20px;
+            border-radius: 10px;
+            background-color: beige;
+            border-color: rgb(255, 188, 3);
+        }
+        .pokeImg {
+            width: 205px;
+            height: 205px;
+            position: absolute;
+            top: 100px;
+            left: 100px;
+        }
+        .pokeimg {
+            position: absolute;
+            top: 300px;
+            left: 145px;
+            width: 110px;
+            height: 110px;
+        }
+        .grafica {
+            position: absolute;
+            width: 300%;
+            height: 110px;
+            left: 550px;
+            top: 230px;
+        }
+    </style>
+</head>
+<body>
+    <img src="pokedex.jpg" alt="pokedex" width="900px">
+    <input type="text" placeholder="Ponyta" id="pokeName" class="placeholder">
+    <img src="pokeball.jpg" alt="PokeBola" id="pokeImg" class="pokeimg">
+
+    <div id="pokename" class="pokeimg1" style="left: 540px; top: 550px; font-size: 13px;"></div>
+    <div id="pokeHe" class="pokeimg1" style="left: 550px; top: 350px; font-size: 15px;"></div>
+    <div id="pokeWe" class="pokeimg1" style="left: 550px; top: 390px; font-size: 15px;"></div>
+    <div id="poketype" class="pokeimg1" style="left: 670px; top: 338px; font-size: 15px;"></div>
+    <div id="pokeitem" class="pokeimg1" style="left: 670px; top: 380px; font-size: 15px;"></div>
+    <div id="pokemove1" class="pokeimg1" style="left: 240px; top: 280px; font-size: 10px;"></div>
+    <div id="pokemove2" class="pokeimg1" style="left: 240px; top: 320px; font-size: 10px;"></div>
+    <div id="pokemove3" class="pokeimg1" style="left: 240px; top: 360px; font-size: 10px;"></div>
+    <div id="pokemove4" class="pokeimg1" style="left: 240px; top: 400px; font-size: 10px;"></div>
+    <div id="pokeorder" class="pokeimg1" style="left: 150px; top: 280px; font-size: 10px;"></div>
+    <div id="pokeid" class="pokeimg1" style="left: 700px; top: 545px; font-size: 15px;"></div>
+
+    <button onclick="fetchPokemon()" class="button"></button>
+    <div class="grafica">
+        <canvas id="miCanvas"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let miCanva;
+
+        const fetchPokemon = () => {
+            const pokeNameInput = document.getElementById("pokeName");
+            let pokeName = pokeNameInput.value;
+            pokeName = pokeName.toLowerCase();
+            const url = `https://pokeapi.co/api/v2/pokemon/${pokeName}`;
+
+            fetch(url).then((res) => {
+                if (res.status != "200") {
+                    console.log(res);
+                    pokeImage("./pokemon-sad.jpg")
+                } else {
+                    return res.json();
+                }
+            }).then((data) => {
+                if (data) {
+                    console.log(data);
+                    let pokeImg = data.sprites.front_default;
+                    pokeImage(pokeImg);
+                    document.getElementById('pokename').innerHTML = `Name: ${data.forms[0].name}`;
+                    document.getElementById('pokeHe').innerHTML = `Height: ${data.height}`;
+                    document.getElementById('pokeWe').innerHTML = `Weight: ${data.weight}`;
+                    document.getElementById('pokeorder').innerHTML = `Order: ${data.order}`;
+                    document.getElementById('pokeid').innerHTML = `Id: ${data.id}`;
+                    document.getElementById('pokeitem').innerHTML = `Ability: ${data.abilities[0].ability.name}`;
+                    document.getElementById('poketype').innerHTML = `Type: ${data.types[0].type.name}`;
+                    document.getElementById('pokemove1').innerHTML = `Move 1: ${data.moves[0].move.name}`;
+                    document.getElementById('pokemove2').innerHTML = `Move 2: ${data.moves[1].move.name}`;
+                    document.getElementById('pokemove3').innerHTML = `Move 3: ${data.moves[2].move.name}`;
+                    document.getElementById('pokemove4').innerHTML = `Move 4: ${data.moves[3].move.name}`;
+
+                    const miCanvasCtx = document.getElementById("miCanvas").getContext("2d");
+                    if (miCanva != undefined) miCanva.destroy();
+                    miCanva = new Chart(miCanvasCtx, {
+                        type: "bar",
+                        data: {
+                            labels: ["HP", "Attack", "Defense", "Special-A", "Special-D", "Speed"],
+                            datasets: [{
+                                label: `${data.forms[0].name}`,
+                                data: [
+                                    data.stats[0].base_stat,
+                                    data.stats[1].base_stat,
+                                    data.stats[2].base_stat,
+                                    data.stats[3].base_stat,
+                                    data.stats[4].base_stat,
+                                    data.stats[5].base_stat
+                                    ],
+                                borderColor: [
+                                    'rgba(255, 0, 0, 0.8)',
+                                    'rgba(255, 124, 0, 0.8)',
+                                    'rgba(255, 0, 0, 0.8)',
+                                    'rgba(255, 124, 0, 0.8)',
+                                    'rgba(255, 0, 0, 0.8)',
+                                    'rgba(255, 124, 0, 0.8)'
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                x: {
+                                    ticks: {
+                                        maxRotation: 90,
+                                        minRotation: 90,
+                                        color: 'yellow',
+                                        font: { size: 15 }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        };
+
+        const pokeImage = (url) => {
+            const pokePhoto = document.getElementById("pokeImg");
+            pokePhoto.src = url;
+        };
+    </script>
+</body>
+</html>
